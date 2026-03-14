@@ -1,31 +1,33 @@
-OpenZotacZone Bazzite Image for the Zotac Zone Handheld
-This project builds a custom Bazzite image for the Zotac Zone gaming handheld with integrated OpenZotacZone drivers, 144 Hz & HDR fixes, improved fan control, and a preinstalled Decky Loader with a curated plugin set.
+# OpenZotacZone Bazzite Image for the Zotac Zone Handheld
 
-Why this image?
-OpenZotacZone drivers installed via build.sh or manual scripts are only temporary: after kernel updates they must be rebuilt and reinstalled.
+Dieses Projekt baut ein **angepasstes** Bazzite-Image für das Zotac Zone Gaming Handheld mit integrierten OpenZotacZone-Treibern, 144‑Hz- und HDR-Fixes, verbessertem Lüfterverhalten sowie vorinstalliertem Decky Loader mit kuratierter Plugin-Auswahl.[page:1]
 
-A custom Bazzite-based image makes these drivers persistent – they survive system updates, reboots, and rebases within the Universal Blue / bootc workflow.
+## Warum dieses Image?
 
-Built upon:
-Zotac-specific adjustments from: https://github.com/Reed-Schimmel/ZotacBazzite
-The official Universal Blue image template: https://github.com/ublue-os/image-template
-​
-Image Features:
-• Integrated OpenZotacZone Drivers
-• OpenZotacZone drivers are baked into the image and loaded automatically on boot
-Zotac Zone specific features enabled: 
-• Back buttons - Fully functional (P4/P3-like)
-• RGB lighting
-• Controllable via OpenRGB 
-• Fan curves (EC fan control)
-• Managed via CoolerControl 
-• Joystick dials
-• Precise input via rotation and press
-• Extended HID protocol 
-• Touchpad tweaks for more precise input
-• HDR fix scripts for more reliable HDR activation in supported games.
-• 144 Hz fixes (X11/Wayland config + Gamescope/KWin tuning) so the panel consistently runs at 144 Hz.
-• Decky Loader & preinstalled plugins
+OpenZotacZone-Treiber, die über `build.sh` oder manuelle Skripte installiert werden, sind nur temporär und müssen nach Kernel-Updates neu gebaut und erneut installiert werden.[page:1]  
+Ein benutzerdefiniertes Bazzite-basiertes Image macht diese Treiber persistent – sie überstehen Systemupdates, Reboots und Rebases innerhalb des Universal Blue / bootc Workflows.[page:1]
 
-rename iso-gnome or iso-kde.toml -> iso.toml > commit > rebuild
+## Basis
 
+- Zotac-spezifische Anpassungen: https://github.com/Reed-Schimmel/ZotacBazzite [page:1]  
+- Offizielles Universal Blue Image-Template: https://github.com/ublue-os/image-template [page:1]
+
+## Features
+
+- Integrierte OpenZotacZone-Treiber, fest im Image eingebunden und automatisch beim Boot geladen.[page:1]  
+- Zotac-Zone-spezifische Funktionen:
+  - Back Buttons voll funktionsfähig (P4/P3-like).[page:1]
+  - RGB-Beleuchtung steuerbar über OpenRGB.[page:1]
+  - Lüfterkurven (EC Fan Control) verwaltet über CoolerControl.[page:1]
+  - Joystick-Dials mit präziser Eingabe durch Rotation und Druck.[page:1]
+  - Erweiterte HID-Protokoll-Unterstützung.[page:1]
+  - Touchpad-Tweaks für präzisere Eingaben.[page:1]
+- Display & Gaming:
+  - HDR-Fix-Skripte für zuverlässigere HDR-Aktivierung in unterstützten Spielen.[page:1]
+  - 144‑Hz-Fixes (X11/Wayland-Konfiguration + Gamescope/KWin-Tuning), damit das Panel stabil mit 144 Hz läuft.[page:1]
+- Komfort:
+  - Vorinstallierter Decky Loader mit ausgewählten Plugins.[page:1]
+
+## Build-Hinweis
+
+Vor dem Rebuild: `iso-gnome.toml` oder `iso-kde.toml` in `iso.toml` umbenennen, committen und anschließend das Image neu bauen
