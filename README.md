@@ -25,6 +25,9 @@ Joystick dials
 Precise input via rotation and press, ideal for menus, emulators, and shortcuts.
 Extended HID protocol support so the dials show up properly in the system.
 Additional improvements
+
+
+rename iso-gnome or iso-kde.toml -> iso.toml > commit > rebuild
 Touchpad tweaks for more precise input.
 HDR fix scripts for more reliable HDR activation in supported games.
 144 Hz fixes (X11/Wayland config + Gamescope/KWin tuning) so the panel consistently runs at 144 Hz.
