@@ -407,41 +407,57 @@ mkdir -p "$PLUGIN_STAGING"
 cd "$PLUGIN_STAGING"
 
 PLUGINS=(
-    "aarron-lee/SimpleDeckTDP"
-    "AAGaming00/unifydeck"
-    "xXJSONDeruloXx/Decky-Framegen"
-    "xXJSONDeruloXx/decky-lsfg-vk"
-    "moi952/decky-proton-launch"
-    "moraroy/NonSteamLaunchersDecky"
-    "Starkka15/junkstore"
-    "DeckThemes/decky-theme-loader"
-    "Tormak9970/TabMaster"
-    "Wurielle/decky-launch-options"
-    "jwhitlow45/free-loader"
-    "SteamGridDB/decky-steamgriddb"
-    "Lui92/decky-protondb-collections"
-    "kEnder242/decky-trailers"
-    "Echarnus/DeckyMetacritic"
-    "cat-in-a-box/Decky-Translator"
-    "sebet/decky-nonsteam-badges"
-    "jacobdonahoe/decky-game-optimizer"
-    "samedayhurt/reshady"
+  "aarron-lee/SimpleDeckTDP"
+  "AAGaming00/unifydeck"
+  "xXJSONDeruloXx/Decky-Framegen"
+  "xXJSONDeruloXx/decky-lsfg-vk"
+  "moi952/decky-proton-launch"
+  "moraroy/NonSteamLaunchersDecky"
+  "Starkka15/junkstore"
+  "DeckThemes/decky-theme-loader"
+  "Tormak9970/TabMaster"
+  "Wurielle/decky-launch-options"
+  "jwhitlow45/free-loader"
+  "SteamGridDB/decky-steamgriddb"
+  "Lui92/decky-protondb-collections"
+  "kEnder242/decky-trailers"
+  "Echarnus/DeckyMetacritic"
+  "cat-in-a-box/Decky-Translator"
+  "sebet/decky-nonsteam-badges"
+  "jacobdonahoe/decky-game-optimizer"
+  "samedayhurt/reshady"
 )
 
 for repo in "${PLUGINS[@]}"; do
-    DOWNLOAD_URL=$(curl -sf "https://api.github.com/repos/${repo}/releases/latest" \
-        | grep 'browser_download_url.*\.tar\.gz' | cut -d '"' -f 4 | head -n 1)
+  echo "-> Verarbeite Decky Plugin ${repo}..."
 
-    if [ -z "$DOWNLOAD_URL" ]; then
-        echo "  SKIP: kein .tar.gz Release für ${repo}"
-        continue
-    fi
+  DOWNLOAD_URL=$(
+    curl -sf "https://api.github.com/repos/${repo}/releases/latest" |
+    grep 'browser_download_url.*\.tar\.gz' |
+    cut -d '"' -f 4 |
+    head -n 1 || true
+  )
 
-    wget -q --show-progress "$DOWNLOAD_URL" || echo "  SKIP: Download fehlgeschlagen für ${repo}"
-done
+  if [ -z "${DOWNLOAD_URL:-}" ]; then
+    echo "   ! Kein .tar.gz-Release für ${repo} gefunden – überspringe."
+    continue
+  fi
 
-for f in *.tar.gz; do
-    [ -f "$f" ] && tar -xzf "$f" && rm "$f"
+  NAME="${repo##*/}"
+
+  if ! curl -fsSL "$DOWNLOAD_URL" -o "${NAME}.tar.gz"; then
+    echo "   ! Download für ${repo} fehlgeschlagen – überspringe."
+    continue
+  fi
+
+  mkdir -p "$NAME"
+  if ! tar -xzf "${NAME}.tar.gz" -C "$NAME" --strip-components=1; then
+    echo "   ! Entpacken für ${repo} fehlgeschlagen – überspringe."
+    rm -f "${NAME}.tar.gz"
+    continue
+  fi
+
+  rm -f "${NAME}.tar.gz"
 done
 
 mkdir -p /usr/etc/profile.d/
