@@ -21,7 +21,7 @@ password = "$6$3AhUOpA7vK3Fje9B$OzpNT3D4ZxcACraD/H15MB/.jI3AhuR8vLhEeEk3sQV0cOM8
 
 [[customizations.filesystem]]
 mountpoint = "/"
-minsize = "16 GiB"
+minsize = "16 GiB" #
 
 # --- Installer Einstellungen ---
 
