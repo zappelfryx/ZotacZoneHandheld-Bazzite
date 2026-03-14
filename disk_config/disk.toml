@@ -1,19 +1,5 @@
-[image]
-name = "zotaczonehandheld-bazzite"
-version = "latest"
-arch = "x86_64"
-
-[rootfs]
-image = "ghcr.io/zappelfryx/zotaczonehandheld-bazzite:latest"
-
-[target]
-type = "qcow2"
-
-[partitioning]
-# Gesamtgröße des qcow2-Images: 16 GiB
-default_size = "16G"
+[customizations]
 
 [[customizations.filesystem]]
 mountpoint = "/"
-# Mindestgröße der Root-Partition, passt in 16G rein
-minsize = "8 GiB"
+minsize = "16 GiB"
