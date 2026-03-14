@@ -4,6 +4,9 @@ version = "0.0.1"
 
 # --- Systemeinstellungen ---
 
+[customizations]
+hostname = "zotac-zone"
+
 [customizations.timezone]
 timezone = "Europe/Berlin"
 
@@ -11,13 +14,10 @@ timezone = "Europe/Berlin"
 languages = ["de_DE.UTF-8"]
 keyboard = "de"
 
-[customizations.hostname]
-hostname = "zotac-zone"
-
 [[customizations.user]]
 name = "root"
-# Füge hier deinen generierten SHA-512 Hash ein (muss mit $6$ beginnen)
-password = "$6$3AhUOpA7vK3Fje9B$OzpNT3D4ZxcACraD/H15MB/.jI3AhuR8vLhEeEk3sQV0cOM8isPXqGzyQbQvJ21l6Ybkv3uPhdCj0wDGegrXv" 
+# Füge hier wieder deinen generierten SHA-512 Hash ein (muss mit $6$ beginnen)
+password = "$6$DeinSaltHier$EinSehrLangerGehashterString..." 
 
 [[customizations.filesystem]]
 mountpoint = "/"
