@@ -17,7 +17,7 @@ hostname = "zotac-zone"
 [[customizations.user]]
 name = "root"
 # Füge hier deinen generierten SHA-512 Hash ein (muss mit $6$ beginnen)
-password = "$6$DeinSaltHier$EinSehrLangerGehashterString..." 
+password = "$6$3AhUOpA7vK3Fje9B$OzpNT3D4ZxcACraD/H15MB/.jI3AhuR8vLhEeEk3sQV0cOM8isPXqGzyQbQvJ21l6Ybkv3uPhdCj0wDGegrXv" 
 
 [[customizations.filesystem]]
 mountpoint = "/"
