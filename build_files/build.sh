@@ -27,7 +27,7 @@ pip install evdev --break-system-packages
 echo "-> Baue & installiere OpenZONE Kernel-Treiber..."
 
 BUILD_DIR="/tmp/zotac_zone_build"
-INSTALL_DIR="/usr/local/lib/zotac-zone"
+INSTALL_DIR="/usr/lib/zotac-zone"
 
 mkdir -p "$BUILD_DIR"
 mkdir -p "$INSTALL_DIR"
@@ -93,7 +93,7 @@ systemctl enable zotac-zone-drivers.service
 # ==========================================
 echo "-> Installiere Dial-Daemon..."
 
-DIAL_SCRIPT="/usr/local/bin/zotac_dial_daemon.py"
+DIAL_SCRIPT="/usr/bin/zotac_dial_daemon.py"
 wget -q -O "$DIAL_SCRIPT" "${REPO_RAW}/install_openzone_drivers.sh" || true
 wget -q -O "$DIAL_SCRIPT" "${REPO_RAW}/driver/hid/zotac-zone.h" || true
 
@@ -258,7 +258,7 @@ PLUGINS=(
 
 for repo in "${PLUGINS[@]}"; do
     DOWNLOAD_URL=$(curl -sf "https://api.github.com/repos/$repo/releases/latest" \
-        | grep "browser_download_url.*\\.tar\\.gz" | cut -d '"' -f 4 | head -n 1)
+        | grep "browser_download_url.*\.tar\.gz" | cut -d '"' -f 4 | head -n 1)
     if [ -n "$DOWNLOAD_URL" ]; then
         wget -q --show-progress "$DOWNLOAD_URL" || echo "WARN: $repo konnte nicht geladen werden"
     else
@@ -266,22 +266,4 @@ for repo in "${PLUGINS[@]}"; do
     fi
 done
 
-for f in *.tar.gz; do
-    [ -f "$f" ] && tar -xzf "$f" && rm "$f"
-done
-
-mkdir -p /usr/etc/profile.d/
-cat > /usr/etc/profile.d/decky-zotac-sync.sh << 'EOF'
-#!/bin/bash
-USER_PLUGIN_DIR="$HOME/homebrew/plugins"
-if [ -d "/usr/share/decky-plugins-staging" ]; then
-    mkdir -p "$USER_PLUGIN_DIR"
-    cp -rn /usr/share/decky-plugins-staging/* "$USER_PLUGIN_DIR/"
-fi
-EOF
-chmod +x /usr/etc/profile.d/decky-zotac-sync.sh
-
-cd /
-rm -rf "$BUILD_DIR"
-
-echo "=== Zotac Zone Customizations beendet ==="
+for f in *.tar.gz;
