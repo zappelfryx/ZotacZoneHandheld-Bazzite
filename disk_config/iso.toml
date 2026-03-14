@@ -1,3 +1,27 @@
+[image]
+name = "zotaczonehandheld-bazzite"
+version = "latest"
+arch = "x86_64"
+
+[rootfs]
+image = "ghcr.io/zappelfryx/zotaczonehandheld-bazzite:latest"
+
+[target]
+type = "anaconda-iso"
+
+[partitioning]
+default_size = "64G"
+
+[anaconda]
+language = "de_DE.UTF-8"
+keyboard = "de"
+timezone = "Europe/Berlin"
+hostname = "zotac-zone"
+
+[users.root]
+password = "Fak3Str33t"
+lock = false
+
 [customizations.installer.kickstart]
 contents = """
 %post
@@ -8,7 +32,7 @@ bootc switch --mutate-in-place --transport registry ghcr.io/zappelfryx/ZotacZone
 [customizations.installer.modules]
 enable = [
   "org.fedoraproject.Anaconda.Modules.Storage",
-  "org.fedoraproject.Anaconda.Modules.Runtime"
+  "org.fedoraproject.Anaconda.Modules.Runtime",
 ]
 disable = [
   "org.fedoraproject.Anaconda.Modules.Network",
@@ -16,5 +40,5 @@ disable = [
   "org.fedoraproject.Anaconda.Modules.Services",
   "org.fedoraproject.Anaconda.Modules.Users",
   "org.fedoraproject.Anaconda.Modules.Subscription",
-  "org.fedoraproject.Anaconda.Modules.Timezone"
+  "org.fedoraproject.Anaconda.Modules.Timezone",
 ]
