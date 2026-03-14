@@ -1,0 +1,137 @@
+#!/bin/bash
+set -ouex pipefail
+
+echo "=== Starte Zotac Zone Customizations ==="
+
+# ==========================================
+# 1. ZotacBazzite (Reed-Schimmel) Repos & Pakete
+# ==========================================
+echo "-> Integriere Reed-Schimmel ZotacBazzite Basis..."
+curl -Lo /etc/yum.repos.d/_copr_reedschimmel-zotac-zone.repo https://copr.fedorainfracloud.org/coprs/reedschimmel/zotac-zone/repo/fedora-40/reedschimmel-zotac-zone-fedora-40.repo
+rpm-ostree install zotac-zone-configuration handygccs
+
+# ==========================================
+# 2. OpenZotacZone Treiber
+# ==========================================
+echo "-> Installiere OpenZotacZone Treiber..."
+mkdir -p /tmp/zotac-drivers && cd /tmp/zotac-drivers
+
+# --- HDR & 144Hz Fix ---
+git clone https://github.com/OpenZotacZone/Zotac-Zone-HDR-144hz.git
+cd Zotac-Zone-HDR-144hz
+mkdir -p /usr/lib/firmware/edid
+cp *.bin /usr/lib/firmware/edid/ 2>/dev/null || true
+cd ..
+
+# --- Fan Control ---
+git clone https://github.com/OpenZotacZone/Zotac-Zone-Fan-Control.git
+cd Zotac-Zone-Fan-Control
+mkdir -p /usr/libexec/coolercontrol
+curl -L -o /usr/libexec/coolercontrol/CoolerControlD-x86_64.AppImage "https://github.com/coolercontrol/coolercontrol/releases/latest/download/CoolerControlD-x86_64.AppImage"
+chmod +x /usr/libexec/coolercontrol/CoolerControlD-x86_64.AppImage
+
+cat << 'EOF' > /usr/lib/systemd/system/coolercontrold.service
+[Unit]
+Description=CoolerControl Daemon
+After=network.target
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/libexec/coolercontrol/CoolerControlD-x86_64.AppImage
+Restart=always
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable coolercontrold.service
+
+KERNEL_VERSION=$(ls /usr/lib/modules/ | grep -v 'debug' | head -n 1)
+if [ -f "zotac-zone-platform.c" ]; then
+    make -C /usr/lib/modules/$KERNEL_VERSION/build M=$(pwd) modules
+    mkdir -p /usr/lib/modules/$KERNEL_VERSION/extra/
+    cp zotac-zone-platform.ko /usr/lib/modules/$KERNEL_VERSION/extra/
+    echo "zotac-zone-platform" > /usr/lib/modules-load.d/zotac-zone-platform.conf
+    depmod -a -b /usr $KERNEL_VERSION
+fi
+cd ..
+
+# --- Dial Drivers ---
+git clone https://github.com/OpenZotacZone/Zotac-Zone-Dial-Drivers.git
+cd Zotac-Zone-Dial-Drivers
+mkdir -p /usr/libexec/zotac-dial
+cp *.py /usr/libexec/zotac-dial/ 2>/dev/null || true
+if [ -f "zotac-dial.service" ]; then
+    sed -i 's|/opt/|/usr/libexec/|g' zotac-dial.service
+    sed -i 's|/var/opt/|/usr/libexec/|g' zotac-dial.service
+    cp zotac-dial.service /usr/lib/systemd/system/
+    systemctl enable zotac-dial.service
+fi
+cd ..
+
+# Treiber-Build-Ordner aufräumen
+cd / && rm -rf /tmp/zotac-drivers
+
+# ==========================================
+# 3. Decky Plugins vorinstallieren
+# ==========================================
+echo "-> Lade Decky Plugins herunter..."
+PLUGIN_DIR="/usr/share/decky-plugins-staging"
+mkdir -p "$PLUGIN_DIR" && cd "$PLUGIN_DIR"
+
+PLUGINS=(
+    "rr1111/decky-zotaccontrol"
+    "AAGaming00/unifydeck"
+    "aarron-lee/SimpleDeckTDP"
+    "xXJSONDeruloXx/Decky-Framegen"
+    "xXJSONDeruloXx/decky-lsfg-vk"
+    "moi952/decky-proton-launch"
+    "koffcheck/potato-deals"
+    "Threshold-Labs/deckydecks"
+    "Wurielle/decky-launch-options"
+    "jacobdonahoe/decky-game-optimizer"
+    "Starkka15/junkstore"
+    "moraroy/NonSteamLaunchersDecky"
+    "sebet/decky-nonsteam-badges"
+    "totallynotbakadestroyer/Decky-Achievement"
+    "pns-sh/SteamHuntersDeckyPlugin"
+    "cat-in-a-box/Decky-Translator"
+    "lobinuxsoft/decky-capydeploy"
+    "Lui92/decky-protondb-collections"
+    "kEnder242/decky-trailers"
+    "ebdevag/optideck-deckdeals"
+    "samedayhurt/reshady"
+    "Echarnus/DeckyMetacritic"
+    "jwhitlow45/free-loader"
+    "itsOwen/playcount-decky"
+    "SteamGridDB/decky-steamgriddb"
+    "DeckThemes/decky-theme-loader" 
+    "Tormak9970/TabMaster"
+)
+
+for repo in "${PLUGINS[@]}"; do
+    DOWNLOAD_URL=$(curl -s "https://api.github.com/repos/$repo/releases/latest" | grep "browser_download_url.*\.tar\.gz" | cut -d '"' -f 4 | head -n 1)
+    if [ -n "$DOWNLOAD_URL" ]; then
+        wget -q --show-progress "$DOWNLOAD_URL"
+    fi
+done
+
+for f in *.tar.gz; do 
+    if [ -f "$f" ]; then
+        tar -xzf "$f"
+        rm "$f"
+    fi
+done
+
+# Sync-Skript für den Nutzer-Login anlegen
+mkdir -p /usr/etc/profile.d/
+cat << 'EOF' > /usr/etc/profile.d/decky-zotac-sync.sh
+#!/bin/bash
+USER_PLUGIN_DIR="$HOME/homebrew/plugins"
+if [ -d "/usr/share/decky-plugins-staging" ]; then
+    mkdir -p "$USER_PLUGIN_DIR"
+    cp -rn /usr/share/decky-plugins-staging/* "$USER_PLUGIN_DIR/"
+fi
+EOF
+chmod +x /usr/etc/profile.d/decky-zotac-sync.sh
+
+echo "=== Zotac Zone Customizations beendet ===”
+
