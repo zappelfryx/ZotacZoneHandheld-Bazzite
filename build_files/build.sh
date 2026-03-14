@@ -23,17 +23,17 @@ pip install evdev --break-system-packages
 
 # ==========================================
 # 2. OpenZONE Treiber (ZotacZone-Drivers)
-#    Ersetzt: HDR-144hz, Fan-Control, Dial-Drivers
-#    Quelle:  github.com/OpenZotacZone/ZotacZone-Drivers
 # ==========================================
 echo "-> Baue & installiere OpenZONE Kernel-Treiber..."
 
 BUILD_DIR="/tmp/zotac_zone_build"
 INSTALL_DIR="/usr/local/lib/zotac-zone"
-mkdir -p "$BUILD_DIR" "$INSTALL_DIR"
+
+mkdir -p "$BUILD_DIR"
+mkdir -p "$INSTALL_DIR"
+
 cd "$BUILD_DIR"
 
-# Quellcode herunterladen
 HID_FILES=(
     "zotac-zone-hid-core.c"
     "zotac-zone-hid-rgb.c"
@@ -54,7 +54,6 @@ for f in "${PLATFORM_FILES[@]}"; do
     wget -q "${REPO_RAW}/driver/platform/${f}"
 done
 
-# Makefile generieren
 cat > Makefile <<'EOF'
 obj-m += zotac-zone-hid.o
 zotac-zone-hid-y := zotac-zone-hid-core.o zotac-zone-hid-rgb.o zotac-zone-hid-input.o zotac-zone-hid-config.o
@@ -66,13 +65,9 @@ clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 EOF
 
-# Kompilieren
 make -C /usr/lib/modules/${KERNEL_VERSION}/build M=$(pwd) modules
-
-# Installieren
 cp *.ko "$INSTALL_DIR/"
 
-# Systemd-Service: Treiber beim Boot laden
 cat > /usr/lib/systemd/system/zotac-zone-drivers.service <<EOF
 [Unit]
 Description=Load Zotac Zone Drivers (OpenZONE)
@@ -99,12 +94,9 @@ systemctl enable zotac-zone-drivers.service
 echo "-> Installiere Dial-Daemon..."
 
 DIAL_SCRIPT="/usr/local/bin/zotac_dial_daemon.py"
-wget -q -O "$DIAL_SCRIPT" "${REPO_RAW}/install_openzone_drivers.sh"
-# Daemon direkt aus dem Installer-Skript extrahieren (er ist dort inline enthalten)
-# Stattdessen: Daemon direkt herunterladen
+wget -q -O "$DIAL_SCRIPT" "${REPO_RAW}/install_openzone_drivers.sh" || true
 wget -q -O "$DIAL_SCRIPT" "${REPO_RAW}/driver/hid/zotac-zone.h" || true
 
-# Daemon-Skript inline (aus install_openzone_drivers.sh extrahiert)
 cat > "$DIAL_SCRIPT" << 'PYEOF'
 #!/usr/bin/env python3
 # Zotac Zone Dial Daemon (OpenZONE - Raw HID)
@@ -194,15 +186,12 @@ if __name__ == "__main__":
 PYEOF
 chmod +x "$DIAL_SCRIPT"
 
-# udev-Regel für HID-Zugriff
 cat > /usr/lib/udev/rules.d/99-zotac-zone.rules <<'EOF'
 KERNEL=="hidraw*", ATTRS{idVendor}=="1ee9", ATTRS{idProduct}=="1590", MODE="0666"
 EOF
 
-# uinput beim Boot laden
 echo "uinput" > /usr/lib/modules-load.d/zotac-uinput.conf
 
-# Systemd-Service für Dial-Daemon
 cat > /usr/lib/systemd/system/zotac-dials.service <<EOF
 [Unit]
 Description=Zotac Zone Dial Daemon (OpenZONE)
@@ -222,7 +211,6 @@ systemctl enable zotac-dials.service
 
 # ==========================================
 # 4. CoolerControl (Fan-Steuerung)
-#    Ersetzt: manuelles AppImage-Chaos
 # ==========================================
 echo "-> Installiere CoolerControl via COPR..."
 FEDORA_VER=$(rpm -E %fedora)
@@ -270,7 +258,7 @@ PLUGINS=(
 
 for repo in "${PLUGINS[@]}"; do
     DOWNLOAD_URL=$(curl -sf "https://api.github.com/repos/$repo/releases/latest" \
-        | grep "browser_download_url.*\.tar\.gz" | cut -d '"' -f 4 | head -n 1)
+        | grep "browser_download_url.*\\.tar\\.gz" | cut -d '"' -f 4 | head -n 1)
     if [ -n "$DOWNLOAD_URL" ]; then
         wget -q --show-progress "$DOWNLOAD_URL" || echo "WARN: $repo konnte nicht geladen werden"
     else
@@ -282,7 +270,6 @@ for f in *.tar.gz; do
     [ -f "$f" ] && tar -xzf "$f" && rm "$f"
 done
 
-# Sync-Skript für Nutzer-Login
 mkdir -p /usr/etc/profile.d/
 cat > /usr/etc/profile.d/decky-zotac-sync.sh << 'EOF'
 #!/bin/bash
@@ -294,9 +281,6 @@ fi
 EOF
 chmod +x /usr/etc/profile.d/decky-zotac-sync.sh
 
-# ==========================================
-# Aufräumen
-# ==========================================
 cd /
 rm -rf "$BUILD_DIR"
 
