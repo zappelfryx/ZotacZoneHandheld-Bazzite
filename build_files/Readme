@@ -62,14 +62,16 @@ Use this method to build and serve the image entirely from your local machine.
 
     # 4. Generate ISO directly from GHCR (no local registry)
     sudo podman run --rm -it --privileged \
-      --network=host \
-      -v /var/lib/containers/storage:/var/lib/containers/storage \
-      -v ~/iso-output:/build/iso \
-      ghcr.io/jasonn3/build-container-installer:latest \
-      IMAGE_REPO=ghcr.io/zappelfryx \
-      IMAGE_NAME=zotaczonehandheld-bazzite \
-      IMAGE_TAG=latest \
-      VERSION=41
+  --security-opt label=disable \
+  -v ~/.local/share/containers/storage:/var/lib/containers/storage \
+  -v $(pwd):/build \
+  ghcr.io/jasonn3/build-container-installer:latest \
+  IMAGE_REPO=localhost \
+  IMAGE_NAME=zotac-bazzite \
+  IMAGE_TAG=latest \
+  VERSION=41 \
+  VARIANT=Kinoite
+
 
     # 5. Clean up local registry
     podman rm -f local-registry
