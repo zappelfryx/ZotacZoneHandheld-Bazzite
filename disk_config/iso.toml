@@ -1,5 +1,33 @@
-[customizations]
+name = "zotaczonehandheld-bazzite"
+description = "Bazzite Image für Zotac Zone"
+version = "0.0.1"
+
+[[customizations.user]]
+name = "zotac"
+password = "$6$3AhUOpA7vK3Fje9B$OzpNT3D4ZxcACraD/H15MB/.jI3AhuR8vLhEeEk3sQV0cOM8isPXqGzyQbQvJ21l6Ybkv3uPhdCj0wDGegrXv"
+groups = ["wheel"]
+
 [[customizations.filesystem]]
 mountpoint = "/"
-minsize   = "8 GiB"
-rootfs    = "xfs"
+minsize = "8 GiB"
+
+[customizations.installer.kickstart]
+contents = """
+%post
+sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+bootc switch --mutate-in-place --transport registry ghcr.io/zappelfryx/zotaczonehandheld-bazzite:latest
+%end
+"""
+
+[customizations.installer.modules]
+enable = [
+  "org.fedoraproject.Anaconda.Modules.Storage",
+  "org.fedoraproject.Anaconda.Modules.Runtime",
+]
+disable = [
+  "org.fedoraproject.Anaconda.Modules.Network",
+  "org.fedoraproject.Anaconda.Modules.Security",
+  "org.fedoraproject.Anaconda.Modules.Services",
+  "org.fedoraproject.Anaconda.Modules.Subscription",
+  "org.fedoraproject.Anaconda.Modules.Timezone",
+]
