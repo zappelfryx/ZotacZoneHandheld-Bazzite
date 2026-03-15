@@ -28,5 +28,5 @@ A custom Bazzite-based image makes these drivers persistent – they survive sys
   - Preinstalled Decky Loader & plugins
 
 
-User: zotac
-passwd: zotac <- pls change
+- User: zotac
+- passwd: zotac <- pls change
