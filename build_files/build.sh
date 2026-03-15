@@ -303,11 +303,14 @@ systemctl enable coolercontrold.service
 systemctl enable zotac-fan.service
 
 # ==============================================================================
-# 5. BENUTZERKONFIGURATION
+# 5. BENUTZERKONFIGURATION & DIENSTE
 # ==============================================================================
-echo "-> Richte Standard-Benutzer ein..."
+echo "-> Richte Standard-Benutzer und Dienste ein..."
 
 # WICHTIGER HINWEIS: Der Benutzer und das Passwort sind standardmäßig auf 'zotac' gesetzt.
 # Bitte ändere das Passwort direkt nach dem ersten Login über die Systemeinstellungen!
 useradd -m -G wheel zotac
 echo "zotac:zotac" | chpasswd
+
+# SSH-Server (sshd) dauerhaft beim Systemstart aktivieren
+systemctl enable sshd.service
