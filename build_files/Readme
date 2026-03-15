@@ -1,0 +1,81 @@
+# Build Notes
+
+> **Before rebuilding:** Rename `iso-gnome.toml` or `iso-kde.toml` to `iso.toml`, commit the change, then rebuild the image.
+
+
+## Local Build
+
+### Prerequisites
+
+| Resource | Requirement |
+|---|---|
+| VM Image | Fedora Workstation |
+| RAM | 8192 MB |
+| Disk Space | 80 GB |
+| Secure Boot | **Disabled** (Settings → Security) |
+
+
+
+### Setup
+
+sudo dnf update -y
+git clone https://github.com/zappelfryx/ZotacZoneHandheld-Bazzite.git
+cd ZotacZoneHandheld-Bazzite
+# To update later:
+# git pull
+
+
+### Build & Generate ISO (from Remote Registry)
+
+# Build the container image
+podman build -t localhost ZotacZoneHandheld-Bazzite
+
+# Create output directory
+mkdir ~/iso-output
+
+# Generate ISO
+sudo podman run --rm -it --privileged \
+  -v /var/lib/containers/storage:/var/lib/containers/storage \
+  -v ~/iso-output:/build/iso \
+  ghcr.io/jasonn3/build-container-installer:latest \
+  IMAGE_REPO=ghcr.io/zappelfryx \
+  IMAGE_NAME=zotaczonehandheld-bazzite \
+  IMAGE_TAG=latest \
+  VERSION=41 \
+  VARIANT=Kinoite
+
+### — Build & Generate ISO (Fully Local) —
+ Use this method to build and serve the image  entirely from your local machine.
+
+
+# 1. Build the image locally
+
+cd ZotacZoneHandheld-Bazzite
+podman build -t localhost/zotac-zone:latest .
+
+# 2. Start a temporary local registry
+
+podman run -d -p 5000:5000 --name local-registry docker.io/library/registry:2
+
+# 3. Tag and push the image to the local registry
+
+podman tag localhost/zotac-zone:latest localhost:5000/zotac-zone:latest
+podman push --tls-verify=false localhost:5000/zotac-zone:latest
+
+# 4. Generate ISO from local registry 
+
+sudo podman run --rm -it --privileged \
+  --network=host \
+  -v /var/lib/containers/storage:/var/lib/containers/storage \
+  -v ~/iso-output:/build/iso \
+  ghcr.io/jasonn3/build-container-installer:latest \
+  IMAGE_REPO=localhost:5000 \
+  IMAGE_NAME=zotac-zone \
+  IMAGE_TAG=latest \
+  VERSION=41 \
+  VARIANT=Kinoite
+
+# 5. Clean up local registry
+podman rm -f local-registry
+
+
