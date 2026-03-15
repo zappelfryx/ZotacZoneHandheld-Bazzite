@@ -1,73 +1,71 @@
 
 ## Local Build
 
- VM Image = Fedora Workstation 
- RAM  8192 MB 
- Disk Space = 80 GB 
- Secure Boot **Disabled** (Settings → Security) |
-
-
+VM-Image: Fedora Workstation 
+RAM | 8192 MB |
+Disk Space  80 GB 
+Secure Boot  **Disabled** (Settings → Security) 
 
 ### Setup
 
-sudo dnf update -y
-git clone https://github.com/zappelfryx/ZotacZoneHandheld-Bazzite.git
-cd ZotacZoneHandheld-Bazzite
-# To update later:
-# git pull
+    sudo dnf update -y
+    git clone https://github.com/zappelfryx/ZotacZoneHandheld-Bazzite.git
+    cd ZotacZoneHandheld-Bazzite
 
+    # To update later:
+    # git pull
 
-### Build & Generate ISO (from Remote Registry)
+---
 
-# Build the container image
-podman build -t localhost ZotacZoneHandheld-Bazzite
+### Option A – Build & Generate ISO (from Remote Registry)
 
-# Create output directory
-mkdir ~/iso-output
+    # Build the container image
+    podman build -t localhost ZotacZoneHandheld-Bazzite
 
-# Generate ISO
-sudo podman run --rm -it --privileged \
-  -v /var/lib/containers/storage:/var/lib/containers/storage \
-  -v ~/iso-output:/build/iso \
-  ghcr.io/jasonn3/build-container-installer:latest \
-  IMAGE_REPO=ghcr.io/zappelfryx \
-  IMAGE_NAME=zotaczonehandheld-bazzite \
-  IMAGE_TAG=latest \
-  VERSION=41 \
-  VARIANT=Kinoite
+    # Create output directory
+    mkdir ~/iso-output
 
-### — Build & Generate ISO (Fully Local) —
- Use this method to build and serve the image  entirely from your local machine.
+    # Generate ISO
+    sudo podman run --rm -it --privileged \
+      -v /var/lib/containers/storage:/var/lib/containers/storage \
+      -v ~/iso-output:/build/iso \
+      ghcr.io/jasonn3/build-container-installer:latest \
+      IMAGE_REPO=ghcr.io/zappelfryx \
+      IMAGE_NAME=zotaczonehandheld-bazzite \
+      IMAGE_TAG=latest \
+      VERSION=41 \
+      VARIANT=Kinoite
 
+---
 
-# 1. Build the image locally
+### Option B – Build & Generate ISO (Fully Local)
 
-cd ZotacZoneHandheld-Bazzite
-podman build -t localhost/zotac-zone:latest .
+Use this method to build and serve the image entirely from your local machine.
 
-# 2. Start a temporary local registry
+    # 1. Build the image locally
+    cd ZotacZoneHandheld-Bazzite
+    podman build -t localhost/bazzite_zone:latest .
 
-podman run -d -p 5000:5000 --name local-registry docker.io/library/registry:2
+    # 2. Start a temporary local registry
+    podman run -d -p 5000:5000 --name local-registry docker.io/library/registry:2
 
-# 3. Tag and push the image to the local registry
+    # 3. Pull from GHCR, tag, and push to local registry
+    sudo podman pull ghcr.io/zappelfryx/zotaczonehandheld-bazzite:latest
+    sudo podman tag ghcr.io/zappelfryx/zotaczonehandheld-bazzite:latest localhost:5000/bazzite_zone:latest
+    sudo podman push --tls-verify=false localhost:5000/bazzite_zone:latest
 
-podman tag localhost/zotac-zone:latest localhost:5000/zotac-zone:latest
-podman push --tls-verify=false localhost:5000/zotac-zone:latest
+    # 4. Generate ISO directly from GHCR (no local registry)
+    sudo podman run --rm -it --privileged \
+      --network=host \
+      -v /var/lib/containers/storage:/var/lib/containers/storage \
+      -v ~/iso-output:/build/iso \
+      ghcr.io/jasonn3/build-container-installer:latest \
+      IMAGE_REPO=ghcr.io/zappelfryx \
+      IMAGE_NAME=zotaczonehandheld-bazzite \
+      IMAGE_TAG=latest \
+      VERSION=41
 
-# 4. Generate ISO from local registry 
-
-sudo podman run --rm -it --privileged \
-  --network=host \
-  -v /var/lib/containers/storage:/var/lib/containers/storage \
-  -v ~/iso-output:/build/iso \
-  ghcr.io/jasonn3/build-container-installer:latest \
-  IMAGE_REPO=localhost:5000 \
-  IMAGE_NAME=zotac-zone \
-  IMAGE_TAG=latest \
-  VERSION=41 \
-  VARIANT=Kinoite
-
-# 5. Clean up local registry
-podman rm -f local-registry
+    # 5. Clean up local registry
+    podman rm -f local-registry
 
 
