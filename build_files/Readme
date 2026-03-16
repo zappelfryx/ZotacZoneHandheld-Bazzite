@@ -15,8 +15,8 @@ Secure Boot  **Disabled** (Settings → Security)
 ### Setup
 
     sudo dnf update -y
-    git clone https://github.com/zappelfryx/ZotacZoneHandheld-Bazzite.git
-    cd ZotacZoneHandheld-Bazzite
+    git clone 
+    cd 
 
     # To update later:
     # git pull
@@ -37,7 +37,7 @@ Secure Boot  **Disabled** (Settings → Security)
       -v ~/iso-output:/build/iso \
       ghcr.io/jasonn3/build-container-installer:latest \
       IMAGE_REPO=ghcr.io/zappelfryx \
-      IMAGE_NAME=zotaczonehandheld-bazzite \
+      IMAGE_NAME=bazzite-zone \
       IMAGE_TAG=latest \
       VERSION=41 \
       VARIANT=Kinoite
